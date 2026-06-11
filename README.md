@@ -8,7 +8,50 @@ Más allá de la funcionalidad de la aplicación (la cual consiste en una interf
 
 El siguiente diagrama (desarrollado en código Mermaid) detalla el flujo de datos desde el acceso de los usuarios hasta la recolección distribuida de telemetría dentro de la red virtual del servidor:
 
-Link acortado MERMAID PNG: https://goo.su/dffQYXh
+```mermaid
+
+graph TD
+    %% Capa de Usuarios
+    subgraph Usuarios ["Usuarios"]
+        Soporte["Soporte Técnico / Operadores"]
+        DevOps["DevOps Administrator / Monitoreo"]
+    end
+
+    %% Capa IaaS / Infraestructura
+    subgraph OpenStack ["IaaS: Nube Privada OpenStack"]
+        subgraph VM ["VM Ubuntu Server 20.04 LTS"]
+            
+            %% Grupo de Seguridad / Firewall
+            subgraph Firewall ["Security Groups & Perimetric Firewall"]
+                P8501["Ingress: Puerto 8501"]
+                P3000["Ingress: Puerto 3000"]
+            end
+
+            %% Red de Docker
+            subgraph DockerNet ["Red Interna Privada de Docker"]
+                Grafana["Contenedor: grafana<br>Dashboard Visual"]
+                Prometheus["Contenedor: prometheus<br>TSDB Database"]
+                cAdvisor["Contenedor: cadvisor<br>Google Container Advisor"]
+                App["Contenedor: app_plantillas<br>Streamlit App"]
+            end
+
+            %% Almacenamiento persistente (fuera de Docker, dentro de la VM)
+            Storage[("Storage: plantillas.json<br>Bind Mount")]
+        end
+    end
+
+    %% Flujos de Comunicación y Datos
+    Soporte -->|HTTP Requests| P8501
+    DevOps -->|Métricas & Alertas| P3000
+    
+    P3000 --> Grafana
+    Grafana -->|Queries Históricas| Prometheus
+    Prometheus -->|Scrape Activo / Cada 5s| cAdvisor
+    cAdvisor -->|Inspección Nativa del Kernel| App
+    
+    P8501 --> App
+    App <--->|Sincronización en Tiempo Real| Storage
+```
 
 ## Stack Tecnológico & Justificación
 
