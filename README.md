@@ -6,10 +6,9 @@ Más allá de la funcionalidad de la aplicación (la cual consiste en una interf
 
 ## Arquitectura:
 
-El siguiente diagrama (desarrollado en código Mermaid) detalla el flujo de datos desde el acceso de los usuarios hasta la recolección distribuida de telemetría dentro de la red virtual del servidor:
+El siguiente diagrama detalla el flujo de datos desde el acceso de los usuarios hasta la recolección distribuida de telemetría dentro de la red virtual del servidor:
 
 ```mermaid
-
 graph TD
     %% Capa de Usuarios
     subgraph Usuarios ["Usuarios"]
